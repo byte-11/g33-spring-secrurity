@@ -3,6 +3,7 @@ package uz.pdp.config;
 import jakarta.servlet.MultipartConfigElement;
 import jakarta.servlet.ServletRegistration;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+import uz.pdp.config.sercurity.WebConfiguration;
 
 public class DispatcherInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
     @Override
@@ -12,7 +13,7 @@ public class DispatcherInitializer extends AbstractAnnotationConfigDispatcherSer
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[]{WebConfiguration.class};
+        return new Class[]{WebConfiguration.class, DataSourceConfig.class};
     }
 
     @Override

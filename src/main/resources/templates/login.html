@@ -1,11 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
+    <style>
+        .error {
+            color: red;
+            font-size: 13px;
+        }
+        #remember-me{
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
-
+<div class="error" th:if="${param.error}">
+    <p th:text="${param.error}"></p>
+</div>
 <form action="/auth/login" method="post">
     <label>
         Username: <input type="text" name="u_name">
@@ -14,6 +25,11 @@
     <br>
     <label>
         Password: <input type="text" name="psd">
+    </label>
+    <br>
+    <br>
+    <label id="remember-me">
+        Remember me <input type="checkbox" name="remember-me">
     </label>
     <br>
     <br>

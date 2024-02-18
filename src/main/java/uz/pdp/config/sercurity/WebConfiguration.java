@@ -1,4 +1,4 @@
-package uz.pdp.config;
+package uz.pdp.config.sercurity;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
@@ -7,18 +7,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
@@ -44,6 +44,8 @@ import java.util.Locale;
 public class WebConfiguration implements WebMvcConfigurer {
 
     private final ApplicationContext applicationContext;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final CustomAuthenticationFailureHandler authenticationFailureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain (final HttpSecurity http) throws Exception {
@@ -51,26 +53,51 @@ public class WebConfiguration implements WebMvcConfigurer {
                 .csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(register ->
                 register.requestMatchers("/home/**", "/auth/**").permitAll()
-                        .anyRequest().authenticated())
-                .formLogin(login -> login
+                        .anyRequest().fullyAuthenticated())
+                .authenticationProvider(authenticationProvider())
+                .formLogin(config -> config
                         .loginPage("/auth/login")
                         .usernameParameter("u_name")
                         .passwordParameter("psd")
                         .defaultSuccessUrl("/home", false)
-                );
+                        .failureHandler(authenticationFailureHandler))
+                .rememberMe(config -> config
+                        .rememberMeParameter("remember-me")
+                        .rememberMeCookieName("remember-me")
+                        .tokenValiditySeconds(3600 * 24)
+                        .key("secret_key:CMAOcnaomxoaMXOAMdad12d2XxaAxaXAxxasaMOAMDaSMXOAxoMxoamx120mx")
+                        .alwaysRemember(false))
+                .logout(config -> config
+                        .logoutUrl("/auth/logout")
+                        .deleteCookies("JSESSIONID", "remember-me")
+                        .clearAuthentication(true)
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout", "POST")));
         return http.build();
     }
 
-
     @Bean
+    public AuthenticationProvider authenticationProvider(){
+        final var provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        provider.setHideUserNotFoundExceptions(false);
+        return provider;
+    }
+
+    /*@Bean
     public UserDetailsService userDetails(){
         UserDetails userDetails = User.builder()
-                .username("alex")
-                .password("1234")
+                .username("admin")
+                .password("ASDasdsacOMC2dxpas")
+                .roles("ADMIN")
+                .build();
+        UserDetails userDetails2 = User.builder()
+                .username("simple")
+                .password("ASDasdsacOMC2dxpas")
                 .roles("USER")
                 .build();
-        return new InMemoryUserDetailsManager(userDetails);
-    }
+        return new InMemoryUserDetailsManager(userDetails, userDetails2);
+    }*/
 
     @Bean
     public PasswordEncoder passwordEncoder(){
