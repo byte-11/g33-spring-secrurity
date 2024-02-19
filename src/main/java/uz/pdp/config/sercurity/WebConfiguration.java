@@ -9,10 +9,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -41,6 +45,12 @@ import java.util.Locale;
 @EnableWebSecurity
 @ComponentScan("uz.pdp")
 @RequiredArgsConstructor
+@EnableMethodSecurity(
+        prePostEnabled = true,
+        securedEnabled = true,
+        jsr250Enabled = true
+)
+//@EnableGlobalMethodSecurity
 public class WebConfiguration implements WebMvcConfigurer {
 
     private final ApplicationContext applicationContext;
@@ -48,12 +58,15 @@ public class WebConfiguration implements WebMvcConfigurer {
     private final CustomAuthenticationFailureHandler authenticationFailureHandler;
 
     @Bean
-    public SecurityFilterChain securityFilterChain (final HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(register ->
-                register.requestMatchers("/home/**", "/auth/**").permitAll()
-                        .anyRequest().fullyAuthenticated())
+                .authorizeHttpRequests(register ->
+                        register.requestMatchers("/home/**", "/auth/**").permitAll()
+//                                .requestMatchers("/admin/**").hasAnyRole("ADMIN","MANAGER")
+//                                .requestMatchers("/users/**").hasAnyRole("USER","ADMIN","MANAGER")
+//                                .requestMatchers("/managers/**").hasRole("MANAGER")
+                            .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .formLogin(config -> config
                         .loginPage("/auth/login")
@@ -76,7 +89,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(){
+    public AuthenticationProvider authenticationProvider() {
         final var provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
@@ -100,8 +113,8 @@ public class WebConfiguration implements WebMvcConfigurer {
     }*/
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
-        return NoOpPasswordEncoder.getInstance();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -141,7 +154,7 @@ public class WebConfiguration implements WebMvcConfigurer {
 
 
     @Bean
-    public MessageSource messageSource(){
+    public MessageSource messageSource() {
         var messageSource = new ReloadableResourceBundleMessageSource();
         messageSource.setBasename("classpath:/i18n/message");
         return messageSource;
@@ -153,7 +166,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public LocaleResolver localeResolver(){
+    public LocaleResolver localeResolver() {
         var resolver = new CookieLocaleResolver("language");
         resolver.setDefaultLocale(Locale.forLanguageTag("uz"));
         return resolver;

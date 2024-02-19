@@ -8,12 +8,12 @@ import uz.pdp.config.sercurity.WebConfiguration;
 public class DispatcherInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
     @Override
     protected Class<?>[] getRootConfigClasses() {
-        return new Class[0];
+        return new Class[]{};
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[]{WebConfiguration.class, DataSourceConfig.class};
+        return new Class[]{WebConfiguration.class};
     }
 
     @Override

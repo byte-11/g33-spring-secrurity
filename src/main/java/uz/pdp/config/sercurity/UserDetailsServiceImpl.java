@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import uz.pdp.dao.UserDao;
+import uz.pdp.domain.Role;
 import uz.pdp.domain.User;
 
 @Slf4j
@@ -17,23 +19,30 @@ import uz.pdp.domain.User;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final UserDao userDao;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
-            final User user = jdbcTemplate.queryForObject(
-                    "SELECT * FROM users WHERE username=? limit 1",
-                    new BeanPropertyRowMapper<>(User.class),
-                    username);
-            return org.springframework.security.core.userdetails.User.builder()
+            final User user = userDao.getUserByUsername(username);
+            return user;
+            /*return org.springframework.security.core.userdetails.User.builder()
                     .username(user.getUsername())
                     .password(user.getPassword())
-                    .roles(user.getRole())
-                    .build();
+                    .authorities("ADMIN")
+                    .roles(extractUserRoles(user))
+                    .build();*/
         } catch (DataAccessException e) {
             log.error("{}", e.getMessage());
         throw new UsernameNotFoundException("User not found with username - " + username);
         }
+    }
+
+    private static String[] extractUserRoles(User user) {
+        String[] rolesArray = new String[user.getRoles().size()];
+        for (int i = 0; i < rolesArray.length; i++) {
+            rolesArray[i] = user.getRoles().get(i).getCode();
+        }
+        return rolesArray;
     }
 }
