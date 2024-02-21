@@ -19,9 +19,9 @@ import javax.sql.DataSource;
 @PropertySource(value = "classpath:/application.properties")
 public class DataSourceConfig {
 
-    private final Environment environment;
+//    private final Environment environment;
 
-   /* @Value("${spring.datasource.driver}")
+    @Value("${spring.datasource.driver}")
     private String driver;
 
     @Value("${spring.datasource.url}")
@@ -31,7 +31,7 @@ public class DataSourceConfig {
     private String username;
 
     @Value("${spring.datasource.password}")
-    private String password;*/
+    private String password;
 
     @Bean
     public DataSource dataSource() {
@@ -40,15 +40,26 @@ public class DataSourceConfig {
         dataSource.setUrl(url);
         dataSource.setUsername(username);
         dataSource.setPassword(password);*/
-        dataSource.setDriverClassName(environment.getProperty("spring.datasource.driver"));
-        dataSource.setUrl(environment.getProperty("spring.datasource.url"));
-        dataSource.setUsername(environment.getProperty("spring.datasource.username"));
-        dataSource.setPassword(environment.getProperty("spring.datasource.password"));
+        /*String driver = environment.getProperty("spring.datasource.driver");
+        String url = environment.getProperty("spring.datasource.url");
+        String username = environment.getProperty("spring.datasource.username");
+        String password = environment.getProperty("spring.datasource.password");
+*/
+        System.out.println("driver: " + driver);
+        System.out.println("url: " + url);
+        System.out.println("username: " + username);
+        System.out.println("password: " + password);
+
+
+        dataSource.setDriverClassName(driver);
+        dataSource.setUrl(url);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
         return dataSource;
     }
 
     @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
+    public JdbcTemplate jdbcTemplate() {
+        return new JdbcTemplate(dataSource());
     }
 }
