@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+>
 <head>
     <meta charset="UTF-8">
     <title>Logout</title>
@@ -14,10 +16,13 @@
 <div>
     <p>Are you sure logout?</p>
     <form action="/auth/logout" method="post">
-    <div>
-        <input type="submit" value="YES" class="btn">
-        <a href="/home" class="btn"><button>Back to Home</button></a>
-    </div>
+        <input type="hidden" name="_csrf" th:value="${_csrf.getToken()}">
+        <div>
+            <input type="submit" value="YES" class="btn">
+            <a href="/home" class="btn">
+                <button>Back to Home</button>
+            </a>
+        </div>
 
     </form>
 </div>

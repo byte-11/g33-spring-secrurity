@@ -1,15 +1,20 @@
 package uz.pdp.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import uz.pdp.config.sercurity.UserContext;
 
 import javax.annotation.security.RolesAllowed;
 
 @Controller
+@RequiredArgsConstructor
 public class AuthoritiesController {
+
+    private final UserContext userContext;
 
     @ResponseBody
     @GetMapping("/admin")
@@ -17,7 +22,7 @@ public class AuthoritiesController {
 //    @Secured({"ADMIN", "MANAGER"})
 //    @RolesAllowed({"ADMIN", "MANAGER"})
     public String adminPage(){
-        return "ADMIN PAGE";
+        return "ADMIN PAGE \n" + userContext.toString();
     }
 
     @ResponseBody
@@ -26,7 +31,7 @@ public class AuthoritiesController {
 //    @Secured({"ADMIN", "USER", "MANAGER"})
 //    @RolesAllowed({"ADMIN", "USER", "MANAGER"})
     public String usersPage(){
-        return "USERS PAGE";
+        return "USERS PAGE \n" + userContext.toString();
     }
 
     @ResponseBody
@@ -35,13 +40,13 @@ public class AuthoritiesController {
 //    @Secured("MANAGER")
 //    @RolesAllowed({"MANAGER"})
     public String managerPage(){
-        return "MANAGER PAGE";
+        return "MANAGER PAGE \n" + userContext.toString();
     }
 
     @GetMapping("/admin_delete")
     @ResponseBody
     @PreAuthorize("hasAnyAuthority('DELETE')")
     public String deleteAdminPermission(){
-        return "delete_admin_perm";
+        return "delete_admin_perm \n" + userContext.toString();
     }
 }

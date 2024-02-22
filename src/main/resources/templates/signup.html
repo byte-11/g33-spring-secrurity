@@ -19,6 +19,8 @@
     <p th:text="${param.error}"></p>
 </div>
 <form action="/auth/signup" method="post">
+<!--    <input type="hidden" name="_csrf" value="${_csrf.getToken()}">-->
+    <input type="hidden" name="_csrf" th:value="${_csrf.getToken()}">
     <label>
         Username: <input type="text" name="username">
     </label>

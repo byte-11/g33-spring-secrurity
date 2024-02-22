@@ -1,19 +1,28 @@
 package uz.pdp.config.sercurity;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.context.annotation.SessionScope;
+import uz.pdp.domain.User;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(
@@ -30,13 +39,9 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(register ->
-                        register.requestMatchers("/home/**", "/auth/**").permitAll()
-//                                .requestMatchers("/admin/**").hasAnyRole("ADMIN","MANAGER")
-//                                .requestMatchers("/users/**").hasAnyRole("USER","ADMIN","MANAGER")
-//                                .requestMatchers("/managers/**").hasRole("MANAGER")
-                                .anyRequest().authenticated())
+                .authorizeHttpRequests(register -> register
+                        .requestMatchers("/", "/home/**", "/auth/**").permitAll()
+                        .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .formLogin(config -> config
                         .loginPage("/auth/login")
@@ -67,24 +72,29 @@ public class SecurityConfiguration {
         return provider;
     }
 
-    /*@Bean
-    public UserDetailsService userDetails(){
-        UserDetails userDetails = User.builder()
-                .username("admin")
-                .password("ASDasdsacOMC2dxpas")
-                .roles("ADMIN")
-                .build();
-        UserDetails userDetails2 = User.builder()
-                .username("simple")
-                .password("ASDasdsacOMC2dxpas")
-                .roles("USER")
-                .build();
-        return new InMemoryUserDetailsManager(userDetails, userDetails2);
-    }*/
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    @SessionScope
+    public UserContext userContext() {
+        final var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            UserDetails principal = (UserDetails) authentication.getPrincipal();
+            if (principal instanceof User user) {
+                log.info("Connected user - {}", user.getUsername());
+                System.out.println("Connected user - " + user.getUsername());
+                return UserContext.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .roles(user.getRoles())
+                        .build();
+            }
+        }
+        System.out.println("Connected invalid user type");
+        return null;
     }
 
 }
