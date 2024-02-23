@@ -25,24 +25,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
             final User user = userDao.getUserByUsername(username);
-            return user;
-            /*return org.springframework.security.core.userdetails.User.builder()
-                    .username(user.getUsername())
-                    .password(user.getPassword())
-                    .authorities("ADMIN")
-                    .roles(extractUserRoles(user))
-                    .build();*/
+            return new UserContext(user);
         } catch (DataAccessException e) {
             log.error("{}", e.getMessage());
-        throw new UsernameNotFoundException("User not found with username - " + username);
+            throw new UsernameNotFoundException("User not found with username - " + username);
         }
     }
 
-    private static String[] extractUserRoles(User user) {
-        String[] rolesArray = new String[user.getRoles().size()];
-        for (int i = 0; i < rolesArray.length; i++) {
-            rolesArray[i] = user.getRoles().get(i).getCode();
-        }
-        return rolesArray;
-    }
 }

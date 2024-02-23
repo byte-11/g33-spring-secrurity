@@ -8,16 +8,19 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
-
-
+import java.util.Properties;
 
 
 @Configuration
 @RequiredArgsConstructor
 @PropertySource(value = "classpath:/application.properties")
-public class DataSourceConfig {
+@EnableTransactionManagement
+public class DataSourceConfig{
 
 //    private final Environment environment;
 
@@ -33,24 +36,15 @@ public class DataSourceConfig {
     @Value("${spring.datasource.password}")
     private String password;
 
+    @Value("${hibernate.show_sql}")
+    private String showSQL;
+
+    @Value("${hibernate.dialect}")
+    private String hibernateDialect;
+
     @Bean
     public DataSource dataSource() {
         final var dataSource = new DriverManagerDataSource();
-        /*dataSource.setDriverClassName(driver);
-        dataSource.setUrl(url);
-        dataSource.setUsername(username);
-        dataSource.setPassword(password);*/
-        /*String driver = environment.getProperty("spring.datasource.driver");
-        String url = environment.getProperty("spring.datasource.url");
-        String username = environment.getProperty("spring.datasource.username");
-        String password = environment.getProperty("spring.datasource.password");
-*/
-        System.out.println("driver: " + driver);
-        System.out.println("url: " + url);
-        System.out.println("username: " + username);
-        System.out.println("password: " + password);
-
-
         dataSource.setDriverClassName(driver);
         dataSource.setUrl(url);
         dataSource.setUsername(username);
@@ -59,7 +53,27 @@ public class DataSourceConfig {
     }
 
     @Bean
-    public JdbcTemplate jdbcTemplate() {
-        return new JdbcTemplate(dataSource());
+    public Properties hibernateProperties(){
+        Properties properties = new Properties();
+        properties.setProperty("hibernate.show_sql", showSQL);
+        properties.setProperty("hibernate.dialect", hibernateDialect);
+        return properties;
+    }
+
+    @Bean
+    public LocalSessionFactoryBean localSessionFactoryBean(){
+        final var factoryBean = new LocalSessionFactoryBean();
+        factoryBean.setDataSource(dataSource());
+        factoryBean.setPackagesToScan("uz.pdp");
+        factoryBean.setHibernateProperties(hibernateProperties());
+        return factoryBean;
+    }
+
+    @Bean
+    public HibernateTransactionManager hibernateTransactionManager(){
+        final var manager = new HibernateTransactionManager();
+        manager.setSessionFactory(localSessionFactoryBean().getObject());
+        manager.setDataSource(dataSource());
+        return manager;
     }
 }

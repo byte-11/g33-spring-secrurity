@@ -1,4 +1,4 @@
-package uz.pdp.domain;
+package uz.pdp.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,10 +7,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class Permission {
+@AllArgsConstructor
+public class UserUpdateDto {
     private Long id;
-    private String name;
-    private String code;
+    private String username;
 }

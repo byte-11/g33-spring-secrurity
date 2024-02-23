@@ -1,57 +1,49 @@
 package uz.pdp.dao;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import uz.pdp.domain.User;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.List;
 
 @Repository
+@Transactional
 @RequiredArgsConstructor
 public class UserDao {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final RoleDao roleDao;
+    private final SessionFactory session;
 
     public User getUserByUsername(final String username) {
-        try {
-            User user = jdbcTemplate.queryForObject(
-                    "SELECT * FROM USERS WHERE username=? limit 1",
-                    BeanPropertyRowMapper.newInstance(User.class),
-                    username
-            );
-            user.setRoles(roleDao.getAllByUserId(user.getId()));
-            return user;
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
-        }
+        return null;
     }
 
-    public void save(final String username, String password) {
-//        PreparedStatementCreator preparedStatementCreator = con -> {
-//            final var preparedStatement = con
-//                    .prepareStatement("INSERT INTO users(username, password) VALUES(?, ?)");
-//            preparedStatement.setString(1, username);
-//            preparedStatement.setString(2, password);
-//            return preparedStatement;
-//        };
-//        KeyHolder keyHolder = new GeneratedKeyHolder();
-//        jdbcTemplate.update(preparedStatementCreator, keyHolder);
-        jdbcTemplate.update("INSERT INTO users(username, password) VALUES(?, ?)", username, password);
-        Long id = jdbcTemplate.queryForObject("SELECT id FROM users WHERE username=? LIMIT 1", Long.class, username);
-        jdbcTemplate.update(
-                "INSERT INTO user_role(user_id, role_id) " +
-                        "VALUES(?, 1)",
-                id
-        );
+    public User save(User user) {
+        session.getCurrentSession()
+                .persist(user);
+        return user;
+    }
+
+    public User update(User user){
+        return session.getCurrentSession()
+                .merge(user);
+    }
+
+
+    public User getById(long id){
+        return session.getCurrentSession()
+                .get(User.class, id);
+    }
+
+    public void delete(long id){
+        session.getCurrentSession()
+                .remove(getById(id));
+    }
+
+    public List<User> getAll(){
+        return session.getCurrentSession()
+                .createQuery("select u from User u", User.class)
+                .list();
     }
 }

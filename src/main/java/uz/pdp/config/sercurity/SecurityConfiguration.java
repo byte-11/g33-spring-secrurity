@@ -40,7 +40,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(register -> register
-                        .requestMatchers("/", "/home/**", "/auth/**").permitAll()
+                        .requestMatchers("/", "/home/**", "/auth/**","/users/**").permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .formLogin(config -> config
@@ -84,12 +84,12 @@ public class SecurityConfiguration {
         if (authentication != null) {
             UserDetails principal = (UserDetails) authentication.getPrincipal();
             if (principal instanceof User user) {
-                log.info("Connected user - {}", user.getUsername());
-                System.out.println("Connected user - " + user.getUsername());
+//                log.info("Connected user - {}", user.getUsername());
+//                System.out.println("Connected user - " + user.getUsername());
                 return UserContext.builder()
                         .id(user.getId())
-                        .username(user.getUsername())
-                        .roles(user.getRoles())
+//                        .username(user.getUsername())
+//                        .roles(user.getRoles())
                         .build();
             }
         }
