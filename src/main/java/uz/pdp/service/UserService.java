@@ -31,7 +31,7 @@ public class UserService {
     }
 
     public User updateUser(final UserUpdateDto updateDto){
-        User user = userDao.getById(updateDto.getId());
+        final var user = userDao.getById(updateDto.getId());
         user.setName(updateDto.getUsername());
         return userDao.update(user);
     }

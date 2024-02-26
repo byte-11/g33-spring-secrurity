@@ -39,9 +39,15 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         http
+                .cors(config -> config.disable())
+                .csrf(config -> config.disable())
                 .authorizeHttpRequests(register -> register
-                        .requestMatchers("/", "/home/**", "/auth/**","/users/**").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/",
+                                "/home/**",
+                                "/auth/**",
+                                "/users/**",
+                                "/books/**").permitAll()
+                        .anyRequest().permitAll())
                 .authenticationProvider(authenticationProvider())
                 .formLogin(config -> config
                         .loginPage("/auth/login")
@@ -87,7 +93,7 @@ public class SecurityConfiguration {
 //                log.info("Connected user - {}", user.getUsername());
 //                System.out.println("Connected user - " + user.getUsername());
                 return UserContext.builder()
-                        .id(user.getId())
+//                        .id(user.getId())
 //                        .username(user.getUsername())
 //                        .roles(user.getRoles())
                         .build();

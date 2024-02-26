@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -20,7 +18,7 @@ import java.util.Properties;
 @RequiredArgsConstructor
 @PropertySource(value = "classpath:/application.properties")
 @EnableTransactionManagement
-public class DataSourceConfig{
+public class DataSourceConfig {
 
 //    private final Environment environment;
 
@@ -42,6 +40,9 @@ public class DataSourceConfig{
     @Value("${hibernate.dialect}")
     private String hibernateDialect;
 
+    @Value("${jakarta.persistence.schema-generation.database.action}")
+    private String schemaGenerationAction;
+
     @Bean
     public DataSource dataSource() {
         final var dataSource = new DriverManagerDataSource();
@@ -53,15 +54,19 @@ public class DataSourceConfig{
     }
 
     @Bean
-    public Properties hibernateProperties(){
+    public Properties hibernateProperties() {
         Properties properties = new Properties();
         properties.setProperty("hibernate.show_sql", showSQL);
         properties.setProperty("hibernate.dialect", hibernateDialect);
+        properties.setProperty(
+                "jakarta.persistence.schema-generation.database.action",
+                schemaGenerationAction
+        );
         return properties;
     }
 
     @Bean
-    public LocalSessionFactoryBean localSessionFactoryBean(){
+    public LocalSessionFactoryBean localSessionFactoryBean() {
         final var factoryBean = new LocalSessionFactoryBean();
         factoryBean.setDataSource(dataSource());
         factoryBean.setPackagesToScan("uz.pdp");
@@ -70,7 +75,7 @@ public class DataSourceConfig{
     }
 
     @Bean
-    public HibernateTransactionManager hibernateTransactionManager(){
+    public HibernateTransactionManager hibernateTransactionManager() {
         final var manager = new HibernateTransactionManager();
         manager.setSessionFactory(localSessionFactoryBean().getObject());
         manager.setDataSource(dataSource());

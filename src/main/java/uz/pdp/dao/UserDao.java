@@ -16,7 +16,11 @@ public class UserDao {
     private final SessionFactory session;
 
     public User getUserByUsername(final String username) {
-        return null;
+        return session.getCurrentSession()
+//                .createQuery("select u from User u where u.name = ?1", User.class)
+                .createNativeQuery("select * from users where name = ?1", User.class)
+                .setParameter(1, username)
+                .uniqueResult();
     }
 
     public User save(User user) {
@@ -43,7 +47,7 @@ public class UserDao {
 
     public List<User> getAll(){
         return session.getCurrentSession()
-                .createQuery("select u from User u", User.class)
+                .createQuery("from User", User.class)
                 .list();
     }
 }

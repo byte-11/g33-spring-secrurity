@@ -30,7 +30,7 @@ public class UserContext implements UserDetails {
     private List<Role> roles;
 
     public UserContext(User user) {
-        this.id = user.getId();
+//        this.id = user.getId();
         this.username = user.getName();
         this.password = user.getPassword();
 //        this.roles = user.getRoles();
