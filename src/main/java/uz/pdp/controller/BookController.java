@@ -1,15 +1,11 @@
 package uz.pdp.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -26,7 +22,6 @@ import java.util.List;
 public class BookController {
 
     private final BookDao bookDao;
-    private final ObjectMapper mapper;
 
     @GetMapping
     public String booksPage(Model model) {
@@ -38,7 +33,7 @@ public class BookController {
     public String save(
             @ModelAttribute BookCreationDto bookCreationDto,
             Model model
-    ) throws JsonProcessingException {
+    ) {
         Book book = bookDao.save(
                 Book.builder()
                         .title(bookCreationDto.title())
@@ -52,7 +47,7 @@ public class BookController {
 
     @GetMapping("/all/by_desc")
     public String findAllBooksByDescription(@RequestParam("word") String word
-            , Model model) throws JsonProcessingException {
+            , Model model) {
         List<Book> books = bookDao.getAllByDescriptionPartialContains(word);
         model.addAttribute("books", books);
         return "books";

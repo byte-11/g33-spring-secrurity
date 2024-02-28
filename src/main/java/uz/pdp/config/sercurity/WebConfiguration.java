@@ -1,6 +1,5 @@
 package uz.pdp.config.sercurity;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
@@ -51,7 +50,6 @@ public class WebConfiguration implements WebMvcConfigurer {
         SpringTemplateEngine templateEngine = new SpringTemplateEngine();
         templateEngine.setTemplateResolver(templateResolver());
         templateEngine.setMessageSource(messageSource());
-//        templateEngine.setDialect(new SpringSecurityDialect());
         templateEngine.addDialect(new SpringSecurityDialect());
         return templateEngine;
     }
@@ -97,11 +95,5 @@ public class WebConfiguration implements WebMvcConfigurer {
         interceptor.setParamName("lang");
         registry.addInterceptor(interceptor);
         WebMvcConfigurer.super.addInterceptors(registry);
-    }
-
-    @Bean
-    public ObjectMapper modelMapper(){
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper;
     }
 }

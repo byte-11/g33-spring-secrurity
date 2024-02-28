@@ -30,7 +30,11 @@ import java.util.Date;
         @NamedQuery(name = "book.find.by.description.contains", query = "select b from Book b where b.description ilike '%'||:word||'%' ")
 })
 @NamedNativeQueries({
-        @NamedNativeQuery(name = "book.find.by.price.between", query = "select b from book b where price >= :low and price <= :high ")
+        @NamedNativeQuery(
+                name = "book.find.by.price.between",
+                query = "select b from book b where price >= :low and price <= :high ",
+                resultClass = Book.class
+        )
 })
 public class Book {
     @Id
